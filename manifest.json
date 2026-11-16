@@ -1,0 +1,9 @@
+{
+  "id": "contemporary-theme-settings",
+  "name": "Contemporary Theme Settings",
+  "version": "0.1.0",
+  "minAppVersion": "1.9.0",
+  "description": "Companion to the Contemporary theme: collapses the file explorer's action buttons into a single \"...\" menu.",
+  "author": "jsmorabito",
+  "isDesktopOnly": true
+}

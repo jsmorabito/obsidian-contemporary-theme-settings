@@ -1,0 +1,21 @@
+/* The explorer's own button row is replaced by the "..." menu on the Files row.
+   Only hidden once main.js has added that button (.ct-has-more-menu). */
+.workspace-leaf-content[data-type="file-explorer"].ct-has-more-menu .nav-header {
+  display: none;
+}
+
+/* "..." button on the Files row: hidden until the row is hovered or the button is focused */
+.mod-left-split .workspace-tab-header-inner .ct-more-button {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  opacity: 0;
+  --icon-size: var(--icon-s);
+  --icon-stroke: var(--icon-s-stroke-width);
+  transition: opacity 0.12s ease;
+}
+
+.mod-left-split .workspace-tab-header:hover .ct-more-button,
+.mod-left-split .workspace-tab-header .ct-more-button:focus-visible,
+.mod-left-split .workspace-tab-header .ct-more-button.has-active-menu {
+  opacity: 1;
+}
