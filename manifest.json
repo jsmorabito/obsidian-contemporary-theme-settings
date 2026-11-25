@@ -1,7 +1,7 @@
 {
   "id": "contemporary-theme-settings",
   "name": "Contemporary Theme Settings",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "minAppVersion": "1.9.0",
   "description": "Adds a hover menu to the Files row in the left sidebar that holds the file explorer's actions, and hover actions and scrolling titles to editor tabs. Made for the Contemporary theme.",
   "author": "jsmorabito",
