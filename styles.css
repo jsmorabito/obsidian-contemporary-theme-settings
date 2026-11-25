@@ -46,3 +46,85 @@ body.ct-hide-tab-list .workspace-tab-header-tab-list {
 body.ct-hide-mode-button .view-header .view-action.ct-mode-button {
   display: none;
 }
+
+/* Editor tabs: the close button only shows while the tab is hovered, even on the active tab.
+   Hidden, it gives up its space so the title runs to the end of the tab. Stays visible while the
+   tab's menu is open. Only with a pointer that can hover, so touch screens keep the close button. */
+@media (hover: hover) {
+  .workspace .mod-root .workspace-tab-header:not(:hover):not(.has-active-menu) .workspace-tab-header-inner-close-button {
+    display: none;
+  }
+}
+
+/* Copy link button on editor tabs (main.js inserts it before the close button). Hover only. */
+.mod-root .workspace-tab-header .ct-copy-link-button {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: var(--size-2-1);
+  border-radius: var(--radius-s);
+  cursor: var(--cursor);
+  color: var(--tab-text-color-focused);
+  --icon-size: var(--icon-s);
+  --icon-stroke: var(--icon-s-stroke-width);
+}
+
+.mod-root .workspace-tab-header:is(:hover, .has-active-menu) .ct-copy-link-button:not(.is-hidden) {
+  display: flex;
+}
+
+@media (hover: hover) {
+  .mod-root .workspace-tab-header .ct-copy-link-button:hover {
+    color: var(--tab-text-color-focused-active-current);
+    background-color: var(--background-modifier-hover);
+  }
+}
+
+/* Editor tab titles: no ellipsis. A cut-off title fades out at its end instead; main.js tags those
+   with .ct-title-overflows, so titles that fit are never faded.
+   While hovered, main.js scrolls a cut-off title and toggles the edge fades:
+   .ct-scrolled-start fades the start, .ct-scrolled-end drops the end fade at the far end. */
+@property --ct-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --ct-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.workspace .mod-root .workspace-tab-header-inner-title {
+  text-overflow: clip;
+  --ct-fade-start: 0px;
+  --ct-fade-end: 0px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--ct-fade-start),
+    #000 calc(100% - var(--ct-fade-end)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--ct-fade-start),
+    #000 calc(100% - var(--ct-fade-end)),
+    transparent 100%
+  );
+  transition: --ct-fade-start 0.2s ease, --ct-fade-end 0.2s ease;
+}
+
+.workspace .mod-root .workspace-tab-header-inner-title.ct-title-overflows {
+  --ct-fade-end: 24px;
+}
+
+.workspace .mod-root .workspace-tab-header-inner-title.ct-scrolled-start {
+  --ct-fade-start: 16px;
+}
+
+.workspace .mod-root .workspace-tab-header-inner-title.ct-scrolled-end {
+  --ct-fade-end: 0px;
+}
