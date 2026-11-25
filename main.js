@@ -13,13 +13,22 @@
  * explorer's .nav-buttons-container DOM. Everything is guarded, so a change there degrades
  * to "no menu, normal buttons" rather than breaking the explorer.
  */
-const { Plugin, Menu, setIcon } = require("obsidian");
+const { Plugin, Menu, setIcon, PluginSettingTab, Setting } = require("obsidian");
 
 const MORE_CLASS = "ct-more-button";
 const READY_CLASS = "ct-has-more-menu"; // set on the explorer view once the button exists
+const HIDE_TAB_LIST_CLASS = "ct-hide-tab-list"; // on <body> when the tab list button is turned off
+
+const DEFAULT_SETTINGS = {
+  showTabListButton: false, // the chevron at the end of a tab bar that lists open tabs
+};
 
 module.exports = class ContemporaryThemeSettings extends Plugin {
-  onload() {
+  async onload() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.applySettings();
+    this.addSettingTab(new ContemporarySettingTab(this.app, this));
+
     const inject = () => this.injectAll();
     this.registerEvent(this.app.workspace.on("layout-change", inject));
     this.registerEvent(this.app.workspace.on("active-leaf-change", inject));
@@ -27,8 +36,20 @@ module.exports = class ContemporaryThemeSettings extends Plugin {
   }
 
   onunload() {
+    this.unloaded = true; // onload may still be awaiting loadData; stop it re-adding the class
+    document.body.classList.remove(HIDE_TAB_LIST_CLASS);
     document.querySelectorAll("." + MORE_CLASS).forEach((el) => el.remove());
     document.querySelectorAll("." + READY_CLASS).forEach((el) => el.classList.remove(READY_CLASS));
+  }
+
+  applySettings() {
+    if (this.unloaded) return;
+    document.body.classList.toggle(HIDE_TAB_LIST_CLASS, !this.settings.showTabListButton);
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+    this.applySettings();
   }
 
   injectAll() {
@@ -103,3 +124,28 @@ module.exports = class ContemporaryThemeSettings extends Plugin {
     }
   }
 };
+
+class ContemporarySettingTab extends PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    new Setting(containerEl)
+      .setName("Show tab list button")
+      .setDesc(
+        "The chevron at the end of a tab bar. Its menu lists open tabs and has Stack tabs and Close all; " +
+          "those are also in the command palette. The left sidebar never shows it (the theme hides it there)."
+      )
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.showTabListButton).onChange(async (value) => {
+          this.plugin.settings.showTabListButton = value;
+          await this.plugin.saveSettings();
+        })
+      );
+  }
+}

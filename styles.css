@@ -19,3 +19,24 @@
 .mod-left-split .workspace-tab-header .ct-more-button.has-active-menu {
   opacity: 1;
 }
+
+/* Tab list button (chevron at the end of a tab bar). Hidden unless turned on in settings. */
+body.ct-hide-tab-list .workspace-tab-header-tab-list {
+  display: none;
+}
+
+/* Note header (markdown views only): keep the action buttons (star, reading view, "...") right after the
+   title instead of pushed to the far right. The title can still shrink and truncate. */
+.workspace-leaf-content[data-type="markdown"] .view-header-title-container {
+  flex: 0 1 auto;
+}
+
+.workspace-leaf-content[data-type="markdown"] .view-header .view-actions {
+  margin-inline-start: var(--size-4-1);
+  margin-inline-end: auto;
+}
+
+/* New tab page: the "..." menu has nothing useful there (other plugins' actions stay) */
+.workspace-leaf-content[data-type="empty"] .view-actions .view-action[aria-label="More options"] {
+  display: none;
+}
