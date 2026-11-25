@@ -18,9 +18,12 @@ const { Plugin, Menu, setIcon, PluginSettingTab, Setting } = require("obsidian")
 const MORE_CLASS = "ct-more-button";
 const READY_CLASS = "ct-has-more-menu"; // set on the explorer view once the button exists
 const HIDE_TAB_LIST_CLASS = "ct-hide-tab-list"; // on <body> when the tab list button is turned off
+const HIDE_MODE_BUTTON_CLASS = "ct-hide-mode-button"; // on <body> when the reading/editing button is turned off
+const MODE_BUTTON_CLASS = "ct-mode-button"; // tags each note's reading/editing button (its label is translated)
 
 const DEFAULT_SETTINGS = {
   showTabListButton: false, // the chevron at the end of a tab bar that lists open tabs
+  showModeButton: false, // the note header button that switches between reading and editing
 };
 
 module.exports = class ContemporaryThemeSettings extends Plugin {
@@ -29,7 +32,10 @@ module.exports = class ContemporaryThemeSettings extends Plugin {
     this.applySettings();
     this.addSettingTab(new ContemporarySettingTab(this.app, this));
 
-    const inject = () => this.injectAll();
+    const inject = () => {
+      this.injectAll();
+      this.tagModeButtons();
+    };
     this.registerEvent(this.app.workspace.on("layout-change", inject));
     this.registerEvent(this.app.workspace.on("active-leaf-change", inject));
     this.app.workspace.onLayoutReady(inject);
@@ -37,19 +43,29 @@ module.exports = class ContemporaryThemeSettings extends Plugin {
 
   onunload() {
     this.unloaded = true; // onload may still be awaiting loadData; stop it re-adding the class
-    document.body.classList.remove(HIDE_TAB_LIST_CLASS);
+    document.body.classList.remove(HIDE_TAB_LIST_CLASS, HIDE_MODE_BUTTON_CLASS);
     document.querySelectorAll("." + MORE_CLASS).forEach((el) => el.remove());
+    document.querySelectorAll("." + MODE_BUTTON_CLASS).forEach((el) => el.classList.remove(MODE_BUTTON_CLASS));
     document.querySelectorAll("." + READY_CLASS).forEach((el) => el.classList.remove(READY_CLASS));
   }
 
   applySettings() {
     if (this.unloaded) return;
     document.body.classList.toggle(HIDE_TAB_LIST_CLASS, !this.settings.showTabListButton);
+    document.body.classList.toggle(HIDE_MODE_BUTTON_CLASS, !this.settings.showModeButton);
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
     this.applySettings();
+  }
+
+  // MarkdownView.modeButtonEl is internal; if it ever goes away the button just stays visible.
+  tagModeButtons() {
+    for (const leaf of this.app.workspace.getLeavesOfType("markdown")) {
+      const btn = leaf.view && leaf.view.modeButtonEl;
+      if (btn && btn.classList) btn.classList.add(MODE_BUTTON_CLASS);
+    }
   }
 
   injectAll() {
@@ -144,6 +160,19 @@ class ContemporarySettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showTabListButton).onChange(async (value) => {
           this.plugin.settings.showTabListButton = value;
+          await this.plugin.saveSettings();
+        })
+      );
+
+    new Setting(containerEl)
+      .setName("Show reading/editing button")
+      .setDesc(
+        "The note header button that switches between reading and editing view. " +
+          'Switching still works with the "Toggle reading view" command and its hotkey.'
+      )
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.showModeButton).onChange(async (value) => {
+          this.plugin.settings.showModeButton = value;
           await this.plugin.saveSettings();
         })
       );

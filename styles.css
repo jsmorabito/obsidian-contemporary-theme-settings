@@ -40,3 +40,9 @@ body.ct-hide-tab-list .workspace-tab-header-tab-list {
 .workspace-leaf-content[data-type="empty"] .view-actions .view-action[aria-label="More options"] {
   display: none;
 }
+
+/* Reading/editing view button in the note header. Hidden unless turned on in settings.
+   main.js tags it with .ct-mode-button, since its own label is translated. */
+body.ct-hide-mode-button .view-header .view-action.ct-mode-button {
+  display: none;
+}
